@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "aoi",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 1, "name": "La Guajira, Colombia", "description": "Wind energy suitability analysis for La Guajira region, Colombia" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ -73.0, 10.5 ], [ -71.0, 10.5 ], [ -71.0, 12.5 ], [ -73.0, 12.5 ], [ -73.0, 10.5 ] ] ] } }
+]
+}
