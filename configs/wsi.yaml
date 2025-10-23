@@ -1,0 +1,58 @@
+# Vento Wind Suitability Index Configuration
+# This file defines the parameters for wind suitability analysis
+
+# Area of Interest (AOI)
+aoi: "data/interim/aoi.geojson"
+aoi_name: "La Guajira, Colombia"
+crs: "EPSG:3857"  # Web Mercator for global compatibility
+resolution_m: 100  # Resolution in meters
+
+# Input data layers
+layers:
+  wind: "data/raw/wind_100m.tif"           # Wind speed at 100m height
+  dem: "data/raw/dem.tif"                  # Digital Elevation Model
+  # grid: "data/raw/grid_lines.gpkg"        # Electrical grid infrastructure (vector - not supported in basic mode)
+  # restrictions: "data/raw/restrictions.gpkg"  # Protected areas, water bodies, urban areas (vector - not supported in basic mode)
+
+# Criterion weights (must sum to 1.0)
+weights:
+  wind: 0.8          # Wind speed is the most important factor
+  slope: 0.2         # Terrain slope (lower is better)
+  grid_distance: 0.0 # Distance to electrical grid (disabled for basic mode)
+
+# Analysis thresholds
+thresholds:
+  top_percent: 0.15  # Top 15% of suitable sites
+  viability_threshold: 0.5  # WSI threshold for viability
+
+# Output configuration
+output_dir: "outputs"
+output_format: "html"  # html, pdf, or both
+language: "es"  # en or es
+
+# GIS Engine selection
+# Options: python, pyqgis, arcpy
+engine: "python"
+
+# Report specifications
+report:
+  include_metrics: true
+  include_map: true
+  include_charts: true
+  include_statistics: true
+
+# Processing options
+processing:
+  parallel: true
+  max_workers: 4
+  chunk_size: 1000
+
+# Quality control
+quality_control:
+  validate_inputs: true
+  check_crs_consistency: true
+  verify_data_coverage: true
+  min_coverage_percent: 50.0
+
+
+

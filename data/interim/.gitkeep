@@ -1,0 +1,10 @@
+# This file ensures the data/interim directory is tracked by git
+# Place your intermediate data files here:
+# - aoi.geojson (area of interest)
+# - processed wind data
+# - processed elevation data
+# - processed infrastructure data
+
+
+
+

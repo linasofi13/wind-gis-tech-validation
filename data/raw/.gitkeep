@@ -1,0 +1,10 @@
+# This file ensures the data/raw directory is tracked by git
+# Place your raw data files here:
+# - wind_100m.tif (wind speed data)
+# - dem.tif (digital elevation model)
+# - grid_lines.gpkg (electrical grid infrastructure)
+# - restrictions.gpkg (protected areas, water bodies, urban areas)
+
+
+
+
