@@ -223,17 +223,17 @@ if TYPER_AVAILABLE:
             metrics_collector.save_metrics(metrics_path)
             
             # Print results
-            print(f"\n✅ WSI computation completed successfully!")
-            print(f"📊 Processing time: {result.processing_time:.2f} seconds")
-            print(f"💾 Memory usage: {result.memory_usage:.1f} MB")
-            print(f"🗺️  WSI raster: {result.wsi_raster_path}")
-            print(f"📍 Candidate sites: {result.candidate_sites_path}")
-            print(f"🌐 Interactive map: {result.interactive_map_path}")
-            print(f"📈 Metrics: {metrics_path}")
+            print(f"\nWSI computation completed successfully!")
+            print(f"Processing time: {result.processing_time:.2f} seconds")
+            print(f"Memory usage: {result.memory_usage:.1f} MB")
+            print(f"WSI raster: {result.wsi_raster_path}")
+            print(f"Candidate sites: {result.candidate_sites_path}")
+            print(f"Interactive map: {result.interactive_map_path}")
+            print(f"Metrics: {metrics_path}")
             
         except Exception as e:
             logger.error(f"WSI computation failed: {e}")
-            print(f"❌ Error: {e}")
+            print(f"Error: {e}")
             sys.exit(1)
         finally:
             # Cleanup adapters
@@ -293,16 +293,16 @@ if TYPER_AVAILABLE:
             report = generate_report_use_case.execute(config, wsi_result)
             
             # Print results
-            print(f"\n✅ Report generation completed successfully!")
-            print(f"📋 Report ID: {report.report_id}")
-            print(f"📊 Viability: {report.viability_percentage:.1f}%")
-            print(f"📏 Total area: {report.total_area:.1f} km²")
-            print(f"🎯 Suitable area: {report.suitable_area:.1f} km²")
-            print(f"📍 Top sites: {report.top_sites_count:,} cells")
+            print(f"\nReport generation completed successfully!")
+            print(f"Report ID: {report.report_id}")
+            print(f"Viability: {report.viability_percentage:.1f}%")
+            print(f"Total area: {report.total_area:.1f} km²")
+            print(f"Suitable area: {report.suitable_area:.1f} km²")
+            print(f"Top sites: {report.top_sites_count:,} cells")
             
         except Exception as e:
             logger.error(f"Report generation failed: {e}")
-            print(f"❌ Error: {e}")
+            print(f"Error: {e}")
             sys.exit(1)
 
 
@@ -329,48 +329,48 @@ if TYPER_AVAILABLE:
             # Load configuration
             config = load_config(config_path)
             
-            print(f"\n✅ Configuration validation completed!")
-            print(f"🗺️  AOI: {config.aoi.name}")
-            print(f"🔧 Engine: {config.engine.value}")
-            print(f"📏 Resolution: {config.resolution_m} meters")
-            print(f"📊 Top percent: {config.top_percent:.1%}")
+            print(f"\nConfiguration validation completed!")
+            print(f"AOI: {config.aoi.name}")
+            print(f"Engine: {config.engine.value}")
+            print(f"Resolution: {config.resolution_m} meters")
+            print(f"Top percent: {config.top_percent:.1%}")
             
             # Check data files
-            print(f"\n📁 Data files:")
+            print(f"\nData files:")
             for criterion in config.criteria:
                 file_path = Path(criterion.file_path)
                 if file_path.exists():
-                    print(f"  ✅ {criterion.name}: {criterion.file_path}")
+                    print(f"  {criterion.name}: {criterion.file_path}")
                 else:
-                    print(f"  ❌ {criterion.name}: {criterion.file_path} (not found)")
+                    print(f"  {criterion.name}: {criterion.file_path} (not found)")
             
             # Check engine availability
-            print(f"\n🔧 Engine availability:")
+            print(f"\nEngine availability:")
             if config.engine == EngineType.PYQGIS:
                 pyqgis_adapter = PyQGISAdapter()
                 if pyqgis_adapter.is_available():
-                    print(f"  ✅ PyQGIS: Available")
+                    print(f"  PyQGIS: Available")
                 else:
-                    print(f"  ❌ PyQGIS: Not available")
+                    print(f"  PyQGIS: Not available")
             elif config.engine == EngineType.ARCPY:
                 arcpy_adapter = ArcPyAdapter()
                 if arcpy_adapter.is_available():
-                    print(f"  ✅ ArcPy: Available")
+                    print(f"  ArcPy: Available")
                 else:
-                    print(f"  ❌ ArcPy: Not available")
+                    print(f"  ArcPy: Not available")
             else:
-                print(f"  ✅ Python: Available (rasterio)")
+                print(f"  Python: Available (rasterio)")
             
             # Check output directory
             output_dir = Path(config.output_dir)
             if output_dir.exists() or output_dir.parent.exists():
-                print(f"  ✅ Output directory: {config.output_dir}")
+                print(f"  Output directory: {config.output_dir}")
             else:
-                print(f"  ❌ Output directory: {config.output_dir} (cannot create)")
+                print(f"  Output directory: {config.output_dir} (cannot create)")
             
         except Exception as e:
             logger.error(f"Configuration validation failed: {e}")
-            print(f"❌ Error: {e}")
+            print(f"Error: {e}")
             sys.exit(1)
 
 
@@ -381,14 +381,14 @@ if TYPER_AVAILABLE:
         
         Shows version, available engines, and system information.
         """
-        print("🌬️  Vento Wind GIS Technology Validation")
+        print("Vento Wind GIS Technology Validation")
         print("=" * 50)
         print(f"Version: 0.1.0")
         print(f"Purpose: Wind suitability analysis using multicriteria decision making")
         print(f"Architecture: Clean Architecture with domain-driven design")
         print()
         
-        print("🔧 Available Engines:")
+        print("Available Engines:")
         print("  • Python (rasterio) - Always available")
         
         # Check PyQGIS
@@ -412,19 +412,19 @@ if TYPER_AVAILABLE:
             print("  • ArcPy - Not available")
         
         print()
-        print("📚 Commands:")
+        print("Commands:")
         print("  • compute-wsi    - Run wind suitability analysis")
         print("  • generate-report - Generate viability reports")
         print("  • validate-config - Validate configuration and data")
         print("  • info           - Show this information")
         print()
-        print("📖 For more information, see the documentation in docs/")
+        print("For more information, see the documentation in docs/")
 
 
     def main():
         """Main entry point for the CLI."""
         if not TYPER_AVAILABLE:
-            print("❌ Error: Typer is not available. Please install it with: pip install typer")
+            print("Error: Typer is not available. Please install it with: pip install typer")
             sys.exit(1)
         
         app()

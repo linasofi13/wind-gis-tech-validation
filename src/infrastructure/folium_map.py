@@ -122,32 +122,20 @@ class FoliumMapGenerator:
             raise
     
     def _get_geometry_center(self, geometry_input: Union[str, dict]) -> Tuple[float, float]:
-        """
-        Get center point of geometry.
-        
-        Args:
-            geometry_input: Geometry file path or dict
-            
-        Returns:
-            Center coordinates (lat, lon)
-        """
+        """Get center point of geometry."""
         try:
             if isinstance(geometry_input, str):
-                # Load from file
                 import geopandas as gpd
                 gdf = gpd.read_file(geometry_input)
-                # Convert to projected CRS for accurate centroid calculation
                 if gdf.crs and gdf.crs.is_geographic:
                     gdf_projected = gdf.to_crs('EPSG:3857')
                     centroid = gdf_projected.geometry.centroid.iloc[0]
-                    # Convert back to geographic coordinates
                     centroid_geo = gdf_projected.to_crs('EPSG:4326').geometry.centroid.iloc[0]
                     return (centroid_geo.y, centroid_geo.x)
                 else:
                     centroid = gdf.geometry.centroid.iloc[0]
                     return (centroid.y, centroid.x)
             else:
-                # Already a geometry dict
                 from shapely.geometry import shape
                 geom = shape(geometry_input)
                 centroid = geom.centroid
@@ -155,7 +143,6 @@ class FoliumMapGenerator:
                 
         except Exception as e:
             self.logger.warning(f"Could not get geometry center: {e}")
-            # Return default center for La Guajira, Colombia
             return (11.5, -72.0)
     
     def _add_wsi_layer(self, 
@@ -163,40 +150,19 @@ class FoliumMapGenerator:
                       wsi_data: np.ndarray,
                       aoi_geometry: Union[str, dict],
                       crs: str) -> None:
-        """
-        Add WSI layer to map.
-        
-        Args:
-            map_obj: Folium map object
-            wsi_data: WSI raster data
-            aoi_geometry: AOI geometry
-            crs: Coordinate reference system
-        """
+        """Add WSI layer to map."""
         try:
-            # Create WSI visualization
-            # This is a simplified implementation
-            # In practice, you'd convert the raster to a proper format
-            # and add it as a tile layer or overlay
-            
-            # For now, we'll create a simple visualization
-            # by sampling points from the WSI data
-            
-            # Get bounds from geometry
             bounds = self._get_geometry_bounds(aoi_geometry)
-            
-            # Sample points from WSI data
             sample_points = self._sample_wsi_points(wsi_data, bounds)
             
-            # Add points to map
             for point in sample_points:
                 lat, lon, wsi_value = point
                 color = self._get_wsi_color(wsi_value)
                 radius = self._get_wsi_radius(wsi_value)
                 
-                # Create detailed popup with Spanish text
                 popup_text = f"""
                 <div style="font-family: Arial, sans-serif; min-width: 200px;">
-                    <h4 style="margin: 0 0 10px 0; color: #333;">📍 Punto de Idoneidad Eólica</h4>
+                    <h4 style="margin: 0 0 10px 0; color: #333;">Punto de Idoneidad Eólica</h4>
                     <p style="margin: 5px 0;"><strong>WSI:</strong> {wsi_value:.3f}</p>
                     <p style="margin: 5px 0;"><strong>Latitud:</strong> {lat:.4f}°</p>
                     <p style="margin: 5px 0;"><strong>Longitud:</strong> {lon:.4f}°</p>
@@ -222,15 +188,7 @@ class FoliumMapGenerator:
             self.logger.error(f"Failed to add WSI layer: {e}")
     
     def _get_geometry_bounds(self, geometry_input: Union[str, dict]) -> Tuple[float, float, float, float]:
-        """
-        Get bounds from geometry.
-        
-        Args:
-            geometry_input: Geometry file path or dict
-            
-        Returns:
-            Bounds tuple (minx, miny, maxx, maxy)
-        """
+        """Get bounds from geometry."""
         try:
             if isinstance(geometry_input, str):
                 import geopandas as gpd
@@ -248,143 +206,73 @@ class FoliumMapGenerator:
     def _sample_wsi_points(self, 
                           wsi_data: np.ndarray, 
                           bounds: Tuple[float, float, float, float]) -> List[Tuple[float, float, float]]:
-        """
-        Sample points from WSI data, filtering for terrestrial areas only.
-        
-        Args:
-            wsi_data: WSI raster data
-            bounds: Bounds tuple (minx, miny, maxx, maxy)
-            
-        Returns:
-            List of (lat, lon, wsi_value) tuples
-        """
+        """Sample points from WSI data, filtering for terrestrial areas only."""
         points = []
-        
-        # Get bounds
         minx, miny, maxx, maxy = bounds
-        
-        # Adaptive sampling based on data size
         height, width = wsi_data.shape
-        max_points = 1000  # Limit points for performance
+        max_points = 1000
         
         if height * width <= max_points:
             step = 1
         else:
             step = max(1, int(np.sqrt(height * width / max_points)))
         
-        # Sample points
         for i in range(0, height, step):
             for j in range(0, width, step):
                 wsi_value = wsi_data[i, j]
                 if not np.isnan(wsi_value) and wsi_value > 0:
-                    # Convert pixel coordinates to lat/lon
                     lat = miny + (maxy - miny) * (i / height)
                     lon = minx + (maxx - minx) * (j / width)
                     
-                    # Filter for terrestrial areas (Colombia landmass)
                     if self._is_terrestrial_point(lat, lon):
                         points.append((lat, lon, float(wsi_value)))
         
-        # Limit to max_points if we have too many
         if len(points) > max_points:
-            # Sample randomly to get max_points
             import random
             points = random.sample(points, max_points)
         
         return points
     
     def _is_terrestrial_point(self, lat: float, lon: float) -> bool:
-        """
-        Check if a point is on land (terrestrial) based on Colombia's geography.
-        
-        Args:
-            lat: Latitude
-            lon: Longitude
-            
-        Returns:
-            True if point is on land, False if in water
-        """
-        # Colombia's approximate land boundaries
-        # This is a simplified check - in practice you'd use a proper land/water mask
-        
-        # Colombia's mainland boundaries (approximate)
+        """Check if a point is on land (terrestrial) based on Colombia's geography."""
         colombia_bounds = {
-            'north': 15.5,   # Northern border
-            'south': 4.0,    # Southern border  
-            'east': -66.0,   # Eastern border
-            'west': -82.0    # Western border
+            'north': 15.5, 'south': 4.0, 'east': -66.0, 'west': -82.0
         }
         
-        # Check if point is within Colombia's boundaries
         if not (colombia_bounds['south'] <= lat <= colombia_bounds['north'] and
                 colombia_bounds['west'] <= lon <= colombia_bounds['east']):
             return False
         
-        # Additional checks for major water bodies in Colombia
-        # Caribbean Sea (north of Colombia)
         if lat > 12.0 and lon > -75.0:
             return False
         
-        # Pacific Ocean (west of Colombia) 
         if lon < -78.0:
             return False
         
-        # Amazon region (southeast) - mostly land but some water
-        if lat < 6.0 and lon > -70.0:
-            # This area has some water bodies, but we'll include it as terrestrial
-            pass
-        
-        # La Guajira region (northeast) - this is our target area
         if 10.5 <= lat <= 12.5 and -73.0 <= lon <= -71.0:
             return True
         
-        # Default to terrestrial for points within Colombia
         return True
     
     def _get_wsi_color(self, wsi_value: float) -> str:
-        """
-        Get color for WSI value.
-        
-        Args:
-            wsi_value: WSI value (0-1)
-            
-        Returns:
-            Color string
-        """
+        """Get color for WSI value."""
         if wsi_value < 0.2:
-            return '#FF0000'  # Red
+            return '#FF0000'
         elif wsi_value < 0.4:
-            return '#FFA500'  # Orange
+            return '#FFA500'
         elif wsi_value < 0.6:
-            return '#FFFF00'  # Yellow
+            return '#FFFF00'
         elif wsi_value < 0.8:
-            return '#90EE90'  # Light Green
+            return '#90EE90'
         else:
-            return '#006400'  # Dark Green
+            return '#006400'
     
     def _get_wsi_radius(self, wsi_value: float) -> int:
-        """
-        Get radius for WSI value.
-        
-        Args:
-            wsi_value: WSI value (0-1)
-            
-        Returns:
-            Radius in pixels
-        """
-        # Scale radius based on WSI value (4-12 pixels) - increased for better visibility
+        """Get radius for WSI value."""
         return int(4 + wsi_value * 8)
     
     def _get_wsi_classification(self, wsi_value: float) -> str:
-        """
-        Get Spanish classification for WSI value.
-        
-        Args:
-            wsi_value: WSI value (0-1)
-            
-        Returns:
-            Classification string in Spanish
-        """
+        """Get Spanish classification for WSI value."""
         if wsi_value < 0.2:
             return "Bajo"
         elif wsi_value < 0.4:
@@ -674,7 +562,7 @@ class FoliumMapGenerator:
             const originalText = button.innerHTML;
             
             // Show loading state
-            button.innerHTML = '⏳ Generando...';
+            button.innerHTML = 'Generando...';
             button.disabled = true;
             
             // Get map container
@@ -726,7 +614,7 @@ class FoliumMapGenerator:
                         document.body.removeChild(link);
                         
                         // Reset button
-                        button.innerHTML = '✅ Exportado';
+                        button.innerHTML = 'Exportado';
                         setTimeout(() => {
                             button.innerHTML = originalText;
                             button.disabled = false;
@@ -765,7 +653,7 @@ class FoliumMapGenerator:
                 'lat': 11.5444,
                 'lon': -72.9072,
                 'type': 'city',
-                'icon': '🏙️',
+                'icon': 'building',
                 'description': 'Capital de La Guajira'
             },
             {
@@ -773,7 +661,7 @@ class FoliumMapGenerator:
                 'lat': 11.3833,
                 'lon': -72.2333,
                 'type': 'city',
-                'icon': '🏘️',
+                'icon': 'home',
                 'description': 'Ciudad fronteriza'
             },
             {
@@ -781,7 +669,7 @@ class FoliumMapGenerator:
                 'lat': 11.7167,
                 'lon': -72.2667,
                 'type': 'city',
-                'icon': '🏘️',
+                'icon': 'home',
                 'description': 'Capital indígena'
             },
             {
@@ -789,7 +677,7 @@ class FoliumMapGenerator:
                 'lat': 12.4333,
                 'lon': -71.6667,
                 'type': 'landmark',
-                'icon': '🗺️',
+                'icon': 'map',
                 'description': 'Punto más septentrional de Colombia'
             },
             {
@@ -797,7 +685,7 @@ class FoliumMapGenerator:
                 'lat': 12.2167,
                 'lon': -72.1167,
                 'type': 'landmark',
-                'icon': '🏖️',
+                'icon': 'beach',
                 'description': 'Destino turístico importante'
             },
             {

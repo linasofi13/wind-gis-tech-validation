@@ -348,7 +348,7 @@ def create_improved_html_content(report, config, wsi_result):
 if __name__ == "__main__":
     print("Script para mejorar los reportes HTML creado exitosamente!")
     print("Este script proporciona:")
-    print("✅ Traducción completa al español")
-    print("✅ Mejor formato de tablas")
-    print("✅ Diseño responsivo")
-    print("✅ Estilos modernos")
+    print(" Traducción completa al español")
+    print(" Mejor formato de tablas")
+    print(" Diseño responsivo")
+    print(" Estilos modernos")
